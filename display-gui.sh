@@ -7,18 +7,20 @@ CH_BOTH="󰹑    Extend Both"
 OPTIONS="${CH_LAPTOP}\n${CH_EXTERNAL}\n${CH_BOTH}"
 FONT="GeistMono Nerd Font"
 
-# --- Vibrant Material Palette ---
+# --- Palette ---
 BG="#1E1E2E"
+SURFACE="#2A2A3C"
+SURFACE_HOVER="#38384D"
 FG="#D9E0EE"
 ACCENT="#c678dd"
-SELECTION="#c678dd"
-CREAM="#F5E0DC"
-SELECT_TEXT="#11111B"
+ON_ACCENT="#11111B"
 
 # --- Wofi Configuration ---
 CONFIG_FILE=$(mktemp --suffix=wofi.conf)
 STYLE_FILE=$(mktemp --suffix=wofi.css)
-trap 'rm -f "${CONFIG_FILE}" "${STYLE_FILE}"' EXIT
+# Throwaway cache: wofi sorts by usage count, which would reorder the options over time
+CACHE_FILE=$(mktemp --suffix=wofi.cache)
+trap 'rm -f "${CONFIG_FILE}" "${STYLE_FILE}" "${CACHE_FILE}"' EXIT
 
 cat >"${CONFIG_FILE}" <<WOFI
 show=dmenu
@@ -27,69 +29,64 @@ lines=3
 location=center
 close_on_focus_loss=true
 allow_images=false
+hide_scroll=true
+cache_file=${CACHE_FILE}
 prompt=""
 WOFI
 
 cat >"${STYLE_FILE}" <<WOFI
+/* The window stays transparent so the rounded corners of #outer-box show the desktop */
 window {
-    border-radius: 32px;
-    border: 2px solid rgba(198, 120, 221, 0.3);
-    background-color: ${BG};
+    background-color: transparent;
     font-family: "${FONT}";
 }
 
 #outer-box {
-    margin: 20px;
+    margin: 24px;
+    padding: 14px;
+    border-radius: 28px;
+    border: 1px solid rgba(198, 120, 221, 0.35);
+    background-color: ${BG};
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
 }
 
-#input {
-    display: none;
-    opacity: 0;
-    margin: -100px;
-}
-
-/* THE FIX: Specifically target the GTK selection layers that cause the "ghost" corners */
-flowboxchild, row {
-    border-radius: 22px;
-    margin: 6px 0px;
-    background-color: transparent; /* Kill the default rectangular highlight */
-    outline: none;                /* Remove focus rings */
-    box-shadow: none;             /* Remove default GTK selection shadows */
-}
-
-/* Ensure parents remain transparent even when selected */
-flowboxchild:selected, row:selected {
+#scroll, #inner-box {
     background-color: transparent;
+    border: none;
+}
+
+/* #entry is the flowboxchild itself */
+#entry {
+    margin: 4px 0;
+    padding: 16px 22px;
+    border-radius: 18px;
     outline: none;
     box-shadow: none;
+    background-color: ${SURFACE};
+    transition: background-color 120ms ease;
 }
 
-#entry {
-    padding: 18px 25px;
-    border-radius: 22px;
-    background-color: ${CREAM};
-    border: 1px solid transparent;
-    overflow: hidden; /* Force content to respect the 22px radius */
-}
-
-#entry #text {
-    color: ${SELECT_TEXT};
-    font-weight: 600;
+#entry:hover {
+    background-color: ${SURFACE_HOVER};
 }
 
 #entry:selected {
-    background-color: ${SELECTION};
-    border: 1px solid ${ACCENT};
-    border-radius: 22px;
-    overflow: hidden;
+    background-color: ${ACCENT};
+}
+
+#entry #text {
+    color: ${FG};
+    font-weight: 600;
+}
+
+/* :selected propagates to children, so the GTK theme's "*:selected" rule would
+   otherwise paint its own background behind the label */
+#entry:selected * {
+    background: transparent;
 }
 
 #entry:selected #text {
-    color: #ffffff;
-}
-
-#scroll {
-    border: none;
+    color: ${ON_ACCENT};
 }
 WOFI
 
