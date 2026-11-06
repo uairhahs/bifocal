@@ -1,4 +1,7 @@
 #!/bin/bash
+# bifocal-menu: wofi (or rofi) picker for bifocal, meant for a keyboard shortcut
+
+BIFOCAL="$(dirname "$(readlink -f "$0")")/bifocal"
 
 # --- Icons & Options ---
 CH_LAPTOP="󰌢    Laptop Only"
@@ -99,8 +102,8 @@ fi
 
 # --- Switching Logic ---
 case "${CHOICE}" in
-*"Laptop Only"*) /home/"${USER}"/.local/bin/airhahs-display-manager.sh internal ;;
-*"External Only"*) /home/"${USER}"/.local/bin/airhahs-display-manager.sh external ;;
-*"Extend Both"*) /home/"${USER}"/.local/bin/airhahs-display-manager.sh extended ;;
+*"Laptop Only"*) "${BIFOCAL}" internal ;;
+*"External Only"*) "${BIFOCAL}" external ;;
+*"Extend Both"*) "${BIFOCAL}" extended ;;
 *) exit 0 ;;
 esac

@@ -1,5 +1,5 @@
 #!/bin/bash
-# ~/.local/bin/airhahs-display-manager.sh
+# bifocal: switch a docked laptop between internal, external and extended (external above internal) layouts
 # shellcheck disable=SC2312
 
 # --- 1. Display Detection ---
