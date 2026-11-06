@@ -1,7 +1,8 @@
+Bifocal
+Copyright (c) 2025-2026 uairhahs and contributors
 
-Copyright (c) 2025 uairhahs and contributors
-
-This project is a simple GUI alternative to the default KDE display management.
+Bifocal switches a docked laptop between its own screen, the dock monitor, or
+both, on KDE Plasma. It is not affiliated with KDE.
 
 ================================================================================
 LICENSE NOTICE
@@ -27,10 +28,10 @@ CONTACT
 ================================================================================
 
 For licensing questions, source code requests, or GPL compliance inquiries:
-https://github.com/uairhahs/display-cycler-for-kde/issues
+https://github.com/uairhahs/bifocal/issues
 
 For general support or bug reports:
-https://github.com/uairhahs/display-cycler-for-kde
+https://github.com/uairhahs/bifocal
 
 ================================================================================
 
