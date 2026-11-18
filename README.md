@@ -31,10 +31,25 @@ mainly kept for personal use. It is not affiliated with KDE.
 
 ```bash
 git clone https://github.com/uairhahs/bifocal.git
-cp bifocal/bifocal bifocal/bifocal-menu ~/.local/bin/
+cd bifocal
+./install.sh
 ```
 
-Keep both scripts in the same directory: `bifocal-menu` calls the
+This copies `bifocal` and `bifocal-menu` to `~/.local/bin` (or
+`$XDG_BIN_HOME`), adds a "Bifocal" command for the keyboard shortcut, warns
+about missing dependencies, and tells you if the install directory is not on
+your `PATH`. Run it again after pulling to update.
+
+The command runs `~/.local/bin/bifocal-menu` rather than a fixed path, so it
+keeps working if your home directory moves. Only an install outside your home
+directory (for example `--dir /usr/local/bin`) uses the full path.
+
+| Option        | Effect                             |
+| ------------- | ---------------------------------- |
+| `--dir DIR`   | Install to `DIR` instead           |
+| `--uninstall` | Remove the scripts and the command |
+
+Both scripts must stay in the same directory: `bifocal-menu` calls the
 `bifocal` next to it.
 
 ## Usage
@@ -49,9 +64,13 @@ bifocal extended   # both, external above
 
 ## Keyboard shortcut
 
-In System Settings, open Keyboard, then Shortcuts, and add a new command
-shortcut that runs `~/.local/bin/bifocal-menu` (or `bifocal` to cycle
-without a picker). Then assign it a key.
+In System Settings, open Keyboard, then Shortcuts. `install.sh` has already
+added "Bifocal" under Commands, running `~/.local/bin/bifocal-menu`; select
+it, choose Add and press a key (`Meta+P` below).
+
+Without the installer, choose Add New, then Command, enter
+`~/.local/bin/bifocal-menu` and name it Bifocal. To cycle layouts without the
+picker, use `~/.local/bin/bifocal` as the command instead.
 
 ![Create Shortcut](res/create-shortcut.png)
 

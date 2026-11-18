@@ -27,7 +27,7 @@ trap 'rm -f "${CONFIG_FILE}" "${STYLE_FILE}" "${CACHE_FILE}"' EXIT
 
 cat >"${CONFIG_FILE}" <<WOFI
 show=dmenu
-width=480
+width=432
 lines=3
 location=center
 close_on_focus_loss=true
@@ -38,19 +38,20 @@ prompt=""
 WOFI
 
 cat >"${STYLE_FILE}" <<WOFI
-/* The window stays transparent so the rounded corners of #outer-box show the desktop */
+/* The window stays transparent so the rounded corners of #outer-box show the desktop.
+   No margin or box-shadow: KWin blurs the whole surface, so any transparent margin
+   shows up as a blurred rectangle around the box. */
 window {
     background-color: transparent;
     font-family: "${FONT}";
 }
 
 #outer-box {
-    margin: 24px;
+    margin: 0;
     padding: 14px;
     border-radius: 28px;
     border: 1px solid rgba(198, 120, 221, 0.35);
     background-color: ${BG};
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
 }
 
 #scroll, #inner-box {
