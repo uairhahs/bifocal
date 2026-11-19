@@ -18,6 +18,8 @@ BIN_DIR="${XDG_BIN_HOME:-${HOME}/.local/bin}"
 APP_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/applications"
 DESKTOP_FILE="${APP_DIR}/bifocal-menu.desktop"
 SCRIPTS=(bifocal bifocal-menu)
+# Data files that bifocal-menu loads from its own directory
+DATA=(bifocal-menu.qml)
 ACTION=install
 
 usage() {
@@ -114,16 +116,18 @@ bound_shortcut() {
 do_install() {
 	local script missing=()
 
-	for script in "${SCRIPTS[@]}"; do
+	for script in "${SCRIPTS[@]}" "${DATA[@]}"; do
 		if [[ ! -f "${SRC_DIR}/${script}" ]]; then
 			echo "install.sh: ${SRC_DIR}/${script} not found" >&2
 			exit 1
 		fi
 	done
 
-	# bifocal-menu runs the bifocal next to it, so both go in the same directory
+	# bifocal-menu runs the bifocal and bifocal-menu.qml next to it, so they all
+	# go in the same directory
 	install -D -m 755 -t "${BIN_DIR}" "${SCRIPTS[@]/#/${SRC_DIR}/}"
-	echo "Installed ${SCRIPTS[*]} to ${BIN_DIR}"
+	install -D -m 644 -t "${BIN_DIR}" "${DATA[@]/#/${SRC_DIR}/}"
+	echo "Installed ${SCRIPTS[*]} ${DATA[*]} to ${BIN_DIR}"
 
 	local exec_line old_exec="" key
 	exec_line="Exec=$(desktop_exec_path "${BIN_DIR}/bifocal-menu")"
@@ -157,8 +161,9 @@ EOF
 
 	command -v kscreen-doctor >/dev/null 2>&1 || missing+=(kscreen-doctor)
 	command -v notify-send >/dev/null 2>&1 || missing+=(notify-send)
-	if ! command -v wofi >/dev/null 2>&1 && ! command -v rofi >/dev/null 2>&1; then
-		missing+=("wofi (or rofi)")
+	command -v flock >/dev/null 2>&1 || missing+=("flock (util-linux)")
+	if ! command -v qml6 >/dev/null 2>&1 && [[ ! -x /usr/lib/qt6/bin/qml && ! -x /usr/lib64/qt6/bin/qml ]]; then
+		missing+=("qml6 (Qt 6 declarative)")
 	fi
 	if [[ ${#missing[@]} -gt 0 ]]; then
 		echo
@@ -186,7 +191,7 @@ EOF
 
 do_uninstall() {
 	local script
-	for script in "${SCRIPTS[@]}"; do
+	for script in "${SCRIPTS[@]}" "${DATA[@]}"; do
 		if [[ -e "${BIN_DIR}/${script}" ]]; then
 			rm -f "${BIN_DIR}/${script}"
 			echo "Removed ${BIN_DIR}/${script}"

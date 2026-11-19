@@ -34,14 +34,15 @@ EXT_SCALE=$(kscreen-doctor -o | grep -iA 5 "Output:.*${EXTERNAL_DISPLAY}" | grep
 [[ -z ${EXT_SCALE} ]] && EXT_SCALE=2
 
 # --- 3. Display Mode Functions ---
+# Notification icons: the same ones the picker and KDE's own display switcher use
 apply_internal_only() {
 	kscreen-doctor output."${INTERNAL_DISPLAY}".enable output."${INTERNAL_DISPLAY}".scale."${INT_SCALE}" output."${EXTERNAL_DISPLAY}".disable
-	notify-send "Laptop Only" -t 2000 -a "System"
+	notify-send "Laptop Only" -i osd-shutd-screen -t 2000 -a "System"
 }
 
 apply_external_only() {
 	kscreen-doctor output."${INTERNAL_DISPLAY}".disable output."${EXTERNAL_DISPLAY}".enable output."${EXTERNAL_DISPLAY}".scale."${EXT_SCALE}"
-	notify-send "External Only" -t 2000 -a "System"
+	notify-send "External Only" -i osd-shutd-laptop -t 2000 -a "System"
 }
 
 apply_both_extended() {
@@ -62,8 +63,6 @@ apply_both_extended() {
 		ext_pos_x=$(awk "BEGIN {printf \"%.0f\", (${log_int_w} - ${log_ext_w}) / 2}")
 	fi
 
-	notify-send "Math Check" "Int at ${int_pos_x},${log_ext_h} | Ext at ${ext_pos_x},0" -t 4000
-
 	kscreen-doctor \
 		output."${EXTERNAL_DISPLAY}".enable output."${EXTERNAL_DISPLAY}".scale."${EXT_SCALE}" \
 		output."${INTERNAL_DISPLAY}".enable output."${INTERNAL_DISPLAY}".scale."${INT_SCALE}"
@@ -74,7 +73,7 @@ apply_both_extended() {
 		output."${EXTERNAL_DISPLAY}".position."${ext_pos_x}",0 \
 		output."${INTERNAL_DISPLAY}".position."${int_pos_x}","${log_ext_h}"
 
-	notify-send "Dual Display" "Extended mode stacked." -t 2000 -a "System"
+	notify-send "Dual Display" "Extended mode stacked." -i osd-sbs-left -t 2000 -a "System"
 }
 
 # --- 4. Main Cycling Logic ---

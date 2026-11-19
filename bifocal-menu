@@ -1,110 +1,59 @@
 #!/bin/bash
-# bifocal-menu: wofi (or rofi) picker for bifocal, meant for a keyboard shortcut
+# bifocal-menu: layout picker for bifocal, meant for a keyboard shortcut
+#
+# The picker is bifocal-menu.qml, run with Qt's qml tool. Running bifocal-menu
+# again while the picker is open does not open a second one: it counts one more
+# press, and the open picker moves its highlight down a row (wrapping), like
+# KDE's own Meta+P display switcher. Enter or a click applies the highlighted
+# layout; Escape or clicking elsewhere closes the picker.
 
-BIFOCAL="$(dirname "$(readlink -f "$0")")/bifocal"
+HERE="$(dirname "$(readlink -f "$0")")"
+BIFOCAL="${HERE}/bifocal"
+MENU_QML="${HERE}/bifocal-menu.qml"
 
-# --- Icons & Options ---
-CH_LAPTOP="󰌢    Laptop Only"
-CH_EXTERNAL="󰍹    External Only"
-CH_BOTH="󰹑    Extend Both"
-OPTIONS="${CH_LAPTOP}\n${CH_EXTERNAL}\n${CH_BOTH}"
-FONT="GeistMono Nerd Font"
+RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}/bifocal-${UID}"
+LOCK_FILE="${RUNTIME_DIR}/menu.lock"
+PRESS_DIR="${RUNTIME_DIR}/presses"
 
-# --- Palette ---
-BG="#1E1E2E"
-SURFACE="#2A2A3C"
-SURFACE_HOVER="#38384D"
-FG="#D9E0EE"
-ACCENT="#c678dd"
-ON_ACCENT="#11111B"
-
-# --- Wofi Configuration ---
-CONFIG_FILE=$(mktemp --suffix=wofi.conf)
-STYLE_FILE=$(mktemp --suffix=wofi.css)
-# Throwaway cache: wofi sorts by usage count, which would reorder the options over time
-CACHE_FILE=$(mktemp --suffix=wofi.cache)
-trap 'rm -f "${CONFIG_FILE}" "${STYLE_FILE}" "${CACHE_FILE}"' EXIT
-
-cat >"${CONFIG_FILE}" <<WOFI
-show=dmenu
-width=432
-lines=3
-location=center
-close_on_focus_loss=true
-allow_images=false
-hide_scroll=true
-cache_file=${CACHE_FILE}
-prompt=""
-WOFI
-
-cat >"${STYLE_FILE}" <<WOFI
-/* The window stays transparent so the rounded corners of #outer-box show the desktop.
-   No margin or box-shadow: KWin blurs the whole surface, so any transparent margin
-   shows up as a blurred rectangle around the box. */
-window {
-    background-color: transparent;
-    font-family: "${FONT}";
-}
-
-#outer-box {
-    margin: 0;
-    padding: 14px;
-    border-radius: 28px;
-    border: 1px solid rgba(198, 120, 221, 0.35);
-    background-color: ${BG};
-}
-
-#scroll, #inner-box {
-    background-color: transparent;
-    border: none;
-}
-
-/* #entry is the flowboxchild itself */
-#entry {
-    margin: 4px 0;
-    padding: 16px 22px;
-    border-radius: 18px;
-    outline: none;
-    box-shadow: none;
-    background-color: ${SURFACE};
-    transition: background-color 120ms ease;
-}
-
-#entry:hover {
-    background-color: ${SURFACE_HOVER};
-}
-
-#entry:selected {
-    background-color: ${ACCENT};
-}
-
-#entry #text {
-    color: ${FG};
-    font-weight: 600;
-}
-
-/* :selected propagates to children, so the GTK theme's "*:selected" rule would
-   otherwise paint its own background behind the label */
-#entry:selected * {
-    background: transparent;
-}
-
-#entry:selected #text {
-    color: ${ON_ACCENT};
-}
-WOFI
-
-# --- Execution ---
-if command -v wofi >/dev/null 2>&1; then
-	CHOICE=$(echo -e "${OPTIONS}" | wofi --conf "${CONFIG_FILE}" --style "${STYLE_FILE}" --hide-search --no-custom-entry --insensitive)
-else
-	CHOICE=$(echo -e "${OPTIONS}" | rofi -dmenu -i -p "󰒓  Layout")
+if [[ ! -d ${RUNTIME_DIR} ]]; then
+	mkdir -m 700 "${RUNTIME_DIR}" || exit 1
 fi
+
+# The open picker holds this lock for as long as it is on screen
+exec 9>"${LOCK_FILE}"
+if ! flock -n 9; then
+	mkdir -p "${PRESS_DIR}"
+	mktemp -p "${PRESS_DIR}" press.XXXXXX >/dev/null
+	exit 0
+fi
+
+rm -rf "${PRESS_DIR}"
+mkdir -p "${PRESS_DIR}"
+
+# The qml tool on PATH may be the Qt 5 one, so look for Qt 6's by name first
+QML=""
+for candidate in qml6 /usr/lib/qt6/bin/qml /usr/lib64/qt6/bin/qml; do
+	if command -v "${candidate}" >/dev/null 2>&1; then
+		QML="${candidate}"
+		break
+	fi
+done
+if [[ -z ${QML} ]]; then
+	notify-send "Bifocal" "Could not find Qt 6's qml tool (qml6)." -i display-error -a "System"
+	exit 1
+fi
+
+"${QML}" "${MENU_QML}" -- "${PRESS_DIR}"
+CHOICE=$?
+
+# Release the lock before switching, which takes a few seconds
+exec 9>&-
+rm -rf "${PRESS_DIR}"
 
 # --- Switching Logic ---
 case "${CHOICE}" in
-*"Laptop Only"*) "${BIFOCAL}" internal ;;
-*"External Only"*) "${BIFOCAL}" external ;;
-*"Extend Both"*) "${BIFOCAL}" extended ;;
+10) exec "${BIFOCAL}" internal ;;
+11) exec "${BIFOCAL}" external ;;
+12) exec "${BIFOCAL}" extended ;;
 *) exit 0 ;;
 esac
