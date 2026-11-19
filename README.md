@@ -1,6 +1,14 @@
 # Bifocal
 
-![Bifocal logo: a wide lens stacked over a smaller one](res/logo.svg)
+<p align="center">
+  <img src="res/logo.svg" alt="Bifocal logo: a wide lens stacked over a smaller one" width="96">
+</p>
+
+<p align="center">
+  <a href="COPYING.txt"><img src="https://img.shields.io/badge/license-GPL--2.0--only-blue" alt="License: GPL-2.0-only"></a>
+  <img src="https://img.shields.io/badge/KDE%20Plasma-6-1d99f3?logo=kde&logoColor=white" alt="KDE Plasma 6">
+  <img src="https://img.shields.io/badge/Qt-6-41cd52?logo=qt&logoColor=white" alt="Qt 6">
+  <img src="https://img.shields.io/badge/shell-bash-4eaa25?logo=gnubash&logoColor=white" alt="Shell: bash"></p>
 
 Switch a docked laptop between its own screen, the dock monitor, or both,
 on KDE Plasma.
