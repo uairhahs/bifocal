@@ -1,5 +1,7 @@
 # Bifocal
 
+![Bifocal logo: a wide lens stacked over a smaller one](res/logo.svg)
+
 Switch a docked laptop between its own screen, the dock monitor, or both,
 on KDE Plasma.
 
