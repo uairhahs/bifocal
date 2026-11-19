@@ -22,10 +22,15 @@ mainly kept for personal use. It is not affiliated with KDE.
 
 ## Dependencies
 
-- KDE Plasma 5 or later, with `kscreen-doctor` (libkscreen)
-- `wofi` for the picker (`rofi` is used as a fallback)
+- KDE Plasma 6, with `kscreen-doctor` (libkscreen)
+- For the picker: Qt 6's `qml` tool (`qml6`, from Qt Declarative),
+  `layer-shell-qt` and Kirigami, all of which Plasma 6 already ships
+- `flock` (util-linux)
 - `notify-send`
-- GeistMono Nerd Font, or any Nerd Font (set `FONT` in `bifocal-menu`)
+
+The picker keeps its own shape but takes its colours from your colour scheme,
+its font from your system font, and its icons from your icon theme (the same
+icons as KDE's display switcher).
 
 ## Installation
 
@@ -35,10 +40,11 @@ cd bifocal
 ./install.sh
 ```
 
-This copies `bifocal` and `bifocal-menu` to `~/.local/bin` (or
-`$XDG_BIN_HOME`), adds a "Bifocal" command for the keyboard shortcut, warns
-about missing dependencies, and tells you if the install directory is not on
-your `PATH`. Run it again after pulling to update.
+This copies `bifocal`, `bifocal-menu` and `bifocal-menu.qml` to
+`~/.local/bin` (or `$XDG_BIN_HOME`), adds a "Bifocal" command for the
+keyboard shortcut, warns about missing dependencies, and tells you if the
+install directory is not on your `PATH`. Run it again after pulling to
+update.
 
 The command runs `~/.local/bin/bifocal-menu` rather than a fixed path, so it
 keeps working if your home directory moves. Only an install outside your home
@@ -49,13 +55,13 @@ directory (for example `--dir /usr/local/bin`) uses the full path.
 | `--dir DIR`   | Install to `DIR` instead           |
 | `--uninstall` | Remove the scripts and the command |
 
-Both scripts must stay in the same directory: `bifocal-menu` calls the
-`bifocal` next to it.
+The three files must stay in the same directory: `bifocal-menu` runs the
+`bifocal` and `bifocal-menu.qml` next to it.
 
 ## Usage
 
 ```bash
-bifocal-menu       # open the picker
+bifocal-menu       # open the picker; run again while open to move down a row
 bifocal            # cycle: internal, then extended, then external
 bifocal internal   # laptop panel only
 bifocal external   # external monitor only
@@ -67,6 +73,13 @@ bifocal extended   # both, external above
 In System Settings, open Keyboard, then Shortcuts. `install.sh` has already
 added "Bifocal" under Commands, running `~/.local/bin/bifocal-menu`; select
 it, choose Add and press a key (`Meta+P` below).
+
+With the picker open, pressing the shortcut again moves the highlight down a
+row (wrapping back to the top). Once you stop, the highlighted layout is
+applied: when you release Meta, or a second after the last press. The arrow
+keys, Tab and `j`/`k` move the highlight without applying anything; press
+Enter or click a layout to apply it. Escape or clicking elsewhere closes the
+picker.
 
 Without the installer, choose Add New, then Command, enter
 `~/.local/bin/bifocal-menu` and name it Bifocal. To cycle layouts without the
